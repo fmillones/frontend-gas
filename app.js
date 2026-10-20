@@ -2,7 +2,7 @@
 // Cámbiala por la URL real de tu backend (sin "/" al final).
 const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
   ? 'http://localhost:3000'
-  : 'https://TU-BACKEND.onrender.com';
+  : 'https://backend-gas-xx35.onrender.com';
 
 const consultaForm = document.getElementById('consultaForm');
 const consultaMsg = document.getElementById('consultaMsg');
