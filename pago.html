@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pago de cuenta - Energía Demo</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  :root{ --navy:#0d1b4c; --green:#00b58a; --purple:#5b2a9e; }
+  html, body{ min-height:100%; }
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(135deg,#e9edf3 0%,#d9dfe9 50%,#c9d2e3 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:24px 12px;
+  }
+  .brand{ font-size:1.8rem; font-weight:900; color:var(--navy); line-height:1; text-decoration:none; margin-bottom:18px; text-align:center; }
+  .brand small{ display:block; color:var(--green); font-size:1rem; font-weight:800; }
+
+  .panel{
+    width:100%; max-width:640px; background:#fff; border-radius:22px; overflow:hidden;
+    box-shadow:0 14px 40px rgba(13,27,76,.18);
+  }
+  .panel-head{ background:var(--navy); color:#fff; padding:1.4rem 1.8rem; text-align:center; }
+  .panel-head .monto{ font-size:2.4rem; font-weight:900; line-height:1.1; }
+  .panel-head .lbl{ opacity:.8; font-size:.85rem; text-transform:uppercase; letter-spacing:.06em; }
+  .panel-body{ padding:1.6rem 1.8rem 2rem; }
+
+  .detalle{ display:grid; grid-template-columns:1fr 1fr; gap:.9rem 1.2rem; margin-bottom:1.5rem; }
+  .detalle .item small{ display:block; color:#6b7385; font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; }
+  .detalle .item span{ font-weight:700; color:var(--navy); word-break:break-word; }
+  @media (max-width:520px){ .detalle{ grid-template-columns:1fr; } .panel-body{ padding:1.2rem; } }
+
+  .titulo{ font-weight:800; color:var(--navy); font-size:1rem; text-align:center; margin-bottom:.9rem; }
+  .opcion-pago{ font-weight:800; padding:1rem; border-radius:14px; color:#fff; border:0; font-size:1.05rem; }
+  .opcion-mall{ background:var(--purple); }
+  .opcion-plus{ background:var(--green); }
+  .opcion-pago:hover:not(:disabled){ color:#fff; filter:brightness(.92); }
+
+  /* Formulario de PayZen: centrado y a todo el ancho del panel */
+  #pagoSection{ width:100%; }
+  #pagoSection .kr-smart-form{ margin:0 auto; width:100%; max-width:100%; }
+
+  /* Formulario fuera de la vista pero con layout real (necesario para que funcione en móviles) */
+  .pago-oculto{
+    position:fixed; top:0; left:0; width:min(100vw,420px);
+    opacity:0; z-index:-1; pointer-events:none;
+  }
+
+  .spinner-box{ text-align:center; padding:1.2rem 0; color:var(--navy); font-weight:700; }
+  .volver{ display:block; text-align:center; margin-top:1.2rem; color:#6b7385; font-size:.9rem; text-decoration:none; }
+  .volver:hover{ color:var(--navy); }
+</style>
+</head>
+<body>
+
+<a class="brand" href="index.html">ENERGÍA<small>+demo</small></a>
+
+<main class="panel" id="panel">
+  <div class="panel-head">
+    <div class="lbl">Total a pagar</div>
+    <div class="monto" id="rMonto">—</div>
+  </div>
+
+  <div class="panel-body">
+    <div id="cargando" class="spinner-box">
+      <div class="spinner-border spinner-border-sm me-2" role="status"></div>Cargando tu cuenta…
+    </div>
+    <div id="errorCuenta" class="text-danger text-center d-none"></div>
+
+    <div id="contenido" class="d-none">
+      <div class="detalle">
+        <div class="item"><small>Cliente</small><span id="rNombre"></span></div>
+        <div class="item"><small>RUT</small><span id="rRut"></span></div>
+        <div class="item"><small>Dirección</small><span id="rDireccion"></span></div>
+        <div class="item"><small>Período</small><span id="rPeriodo"></span></div>
+        <div class="item"><small>Vencimiento</small><span id="rVencimiento"></span></div>
+      </div>
+
+      <hr>
+
+      <!-- Paso 1: elegir medio de pago (se oculta al elegir) -->
+      <div id="opciones">
+        <div class="titulo">Elige cómo quieres pagar</div>
+        <div class="d-grid gap-3">
+          <button type="button" class="btn opcion-pago opcion-mall" data-tienda="mall">Tarjetas</button>
+          <button type="button" class="btn opcion-pago opcion-plus" data-tienda="plus">Webpay Plus</button>
+        </div>
+      </div>
+
+      <!-- Redirección automática a Webpay -->
+      <div id="redirigiendo" class="spinner-box d-none">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>Redirigiendo a Webpay…
+      </div>
+
+      <!-- Paso 2: formulario embebido -->
+      <div id="pagoSection" class="d-none"></div>
+      <div id="pagoMsg" class="form-text text-danger text-center mt-2"></div>
+
+      <a class="volver" href="index.html">← Volver al inicio</a>
+    </div>
+  </div>
+</main>
+
+<script src="pago.js"></script>
+</body>
+</html>

@@ -53,13 +53,6 @@
     .hero-text h2{ font-size:2rem; }
     .pago-facil{ position:static; width:100%; border-radius:24px; }
   }
-
-  /* Popup de pago */
-  .opcion-pago{ font-weight:800; padding:.9rem 1rem; border-radius:12px; color:#fff; }
-  .opcion-mall{ background:var(--purple); }
-  .opcion-plus{ background:var(--green); }
-  .opcion-pago:hover{ color:#fff; filter:brightness(.92); }
-  .monto{ font-size:2rem; font-weight:800; color:var(--navy); }
 </style>
 </head>
 <body>
@@ -98,9 +91,10 @@
     <div class="pago-facil">
       <h3>💳 PAGO FÁCIL</h3>
       <form id="consultaForm">
-        <label for="dni" class="mb-1">N° de Cliente</label>
+        <label for="dni" class="mb-1">RUT (xx.xxx.xxx-x)</label>
         <div class="d-flex gap-2">
-          <input type="text" id="dni" class="form-control" inputmode="numeric" autocomplete="off" required>
+          <input type="text" id="dni" class="form-control" placeholder="12.345.678-9" maxlength="12"
+                 inputmode="text" autocapitalize="characters" autocomplete="off" required>
           <button class="btn btn-pagar" type="submit" id="btnConsultar">Pagar</button>
         </div>
         <div id="consultaMsg" class="form-text mt-2"></div>
@@ -113,44 +107,6 @@
   </section>
 </main>
 
-<!-- Popup de pago -->
-<div class="modal fade" id="modalPago" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title h5">Detalle de tu cuenta</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <dl class="row mb-3">
-          <dt class="col-5">Cliente</dt><dd class="col-7" id="rNombre"></dd>
-          <dt class="col-5">Dirección</dt><dd class="col-7" id="rDireccion"></dd>
-          <dt class="col-5">Período</dt><dd class="col-7" id="rPeriodo"></dd>
-          <dt class="col-5">Vencimiento</dt><dd class="col-7" id="rVencimiento"></dd>
-        </dl>
-        <div class="border-top pt-3 mb-3">
-          <div class="text-muted small">Total a pagar</div>
-          <div class="monto" id="rMonto"></div>
-        </div>
-
-        <!-- Paso 1: elegir medio de pago (se oculta al elegir) -->
-        <div id="opciones">
-          <div class="text-muted small mb-2">Elige cómo quieres pagar</div>
-          <div class="d-grid gap-2">
-            <button type="button" class="btn opcion-pago opcion-mall" data-tienda="mall">Tarjetas</button>
-            <button type="button" class="btn opcion-pago opcion-plus" data-tienda="plus">Webpay Plus</button>
-          </div>
-        </div>
-
-        <!-- Paso 2: formulario embebido -->
-        <div id="pagoSection" class="d-none"></div>
-        <div id="pagoMsg" class="form-text text-danger mt-2"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
