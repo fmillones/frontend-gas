@@ -5,15 +5,26 @@ const cargando = document.getElementById('cargando');
 const errorCuenta = document.getElementById('errorCuenta');
 const contenido = document.getElementById('contenido');
 const opciones = document.getElementById('opciones');
-const redirigiendo = document.getElementById('redirigiendo');
 const pagoSection = document.getElementById('pagoSection');
 const pagoMsg = document.getElementById('pagoMsg');
+const overlayCarga = document.getElementById('overlayCarga');
+const textoCarga = document.getElementById('textoCarga');
 
 let cuentaActual = null;
 let scriptCargado = null; // promesa de carga de la librería (se carga una sola vez)
 
 function formatoCLP(valor) {
   return valor.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
+}
+
+// ---------- Pantalla de carga ----------
+function mostrarCarga(texto) {
+  textoCarga.textContent = texto;
+  overlayCarga.classList.remove('d-none');
+}
+
+function ocultarCarga() {
+  overlayCarga.classList.add('d-none');
 }
 
 // ---------- 1) Cargar el detalle de la cuenta ----------
@@ -53,9 +64,9 @@ function formatoCLP(valor) {
 
 // ---------- Helpers de visibilidad ----------
 function resetPago() {
+  ocultarCarga();
   opciones.classList.remove('d-none');
   opciones.querySelectorAll('button').forEach((b) => (b.disabled = false));
-  redirigiendo.classList.add('d-none');
   pagoSection.classList.add('d-none');
   pagoSection.classList.remove('pago-oculto');
   pagoSection.innerHTML = '';
@@ -67,23 +78,22 @@ function resetPago() {
 function ocultarFormulario() {
   pagoSection.classList.add('pago-oculto');
   pagoSection.classList.remove('d-none');
-  redirigiendo.classList.remove('d-none');
 }
 
 function mostrarFormulario() {
   pagoSection.classList.remove('pago-oculto', 'd-none');
-  redirigiendo.classList.add('d-none');
 }
 
-// ---------- 2) Elegir medio de pago (Mall o Plus) ----------
+// ---------- 2) Elegir medio de pago (Tarjetas o Webpay Plus) ----------
 opciones.addEventListener('click', async (e) => {
   const btn = e.target.closest('button[data-tienda]');
   if (!btn || !cuentaActual) return;
   const tienda = btn.dataset.tienda;
 
-  opciones.querySelectorAll('button').forEach((b) => (b.disabled = true));
-  pagoMsg.textContent = 'Generando pago…';
-  pagoMsg.className = 'form-text text-muted text-center mt-2';
+  // Se ocultan los botones y solo se ve la pantalla de carga
+  opciones.classList.add('d-none');
+  pagoMsg.textContent = '';
+  mostrarCarga(tienda === 'plus' ? 'Redirigiendo a Webpay…' : 'Generando pago…');
 
   try {
     const [cfgRes, pagoRes] = await Promise.all([
@@ -101,14 +111,11 @@ opciones.addEventListener('click', async (e) => {
       throw new Error((pago && pago.error) || (cfg && cfg.error) || 'No se pudo iniciar el pago.');
     }
 
-    // Se ocultan los botones y aparece el formulario
-    opciones.classList.add('d-none');
-    pagoMsg.textContent = '';
     await montarFormularioPago(cfg, pago.formToken, tienda);
   } catch (err) {
+    resetPago();
     pagoMsg.textContent = err.message || 'Error al conectar con el servidor de pago.';
     pagoMsg.className = 'form-text text-danger text-center mt-2';
-    resetPago();
   }
 });
 
@@ -201,23 +208,30 @@ async function montarFormularioPago(cfg, formToken, tienda) {
     formToken
   });
 
-  if (autoPagar) {
-    const ok = await autoPresionarWebpay(pagoSection);
-    if (!ok) {
-      // No se encontró el botón: se muestra el formulario para pagar manualmente
-      mostrarFormulario();
-      pagoMsg.textContent = 'Presiona la opción de Webpay para continuar con el pago.';
-      pagoMsg.className = 'form-text text-muted text-center mt-2';
-      return;
-    }
-
-    // Si tras presionar no hubo redirección, se muestra el formulario como respaldo
-    setTimeout(() => {
-      if (document.visibilityState === 'visible' && pagoSection.classList.contains('pago-oculto')) {
-        mostrarFormulario();
-        pagoMsg.textContent = 'Si no fuiste redirigido, presiona la opción de Webpay.';
-        pagoMsg.className = 'form-text text-muted text-center mt-2';
-      }
-    }, 7000);
+  if (!autoPagar) {
+    // Tarjetas: el formulario ya está listo, se cierra la pantalla de carga
+    ocultarCarga();
+    return;
   }
+
+  // Webpay Plus: la pantalla "Redirigiendo a Webpay…" se mantiene hasta que el navegador salga
+  const ok = await autoPresionarWebpay(pagoSection);
+  if (!ok) {
+    // No se encontró el botón: se muestra el formulario para pagar manualmente
+    ocultarCarga();
+    mostrarFormulario();
+    pagoMsg.textContent = 'Presiona la opción de Webpay para continuar con el pago.';
+    pagoMsg.className = 'form-text text-muted text-center mt-2';
+    return;
+  }
+
+  // Si tras presionar no hubo redirección, se muestra el formulario como respaldo
+  setTimeout(() => {
+    if (document.visibilityState === 'visible' && pagoSection.classList.contains('pago-oculto')) {
+      ocultarCarga();
+      mostrarFormulario();
+      pagoMsg.textContent = 'Si no fuiste redirigido, presiona la opción de Webpay.';
+      pagoMsg.className = 'form-text text-muted text-center mt-2';
+    }
+  }, 7000);
 }

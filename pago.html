@@ -47,6 +47,15 @@
     opacity:0; z-index:-1; pointer-events:none;
   }
 
+  /* Pantalla de carga a pantalla completa */
+  .overlay-carga{
+    position:fixed; inset:0; z-index:2000;
+    background:rgba(255,255,255,.94);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem;
+    color:var(--navy); font-weight:800; font-size:1.15rem; text-align:center; padding:0 1rem;
+  }
+  .overlay-carga .spinner-border{ width:3.5rem; height:3.5rem; color:var(--navy); border-width:.35rem; }
+
   .spinner-box{ text-align:center; padding:1.2rem 0; color:var(--navy); font-weight:700; }
   .volver{ display:block; text-align:center; margin-top:1.2rem; color:#6b7385; font-size:.9rem; text-decoration:none; }
   .volver:hover{ color:var(--navy); }
@@ -88,11 +97,6 @@
         </div>
       </div>
 
-      <!-- Redirección automática a Webpay -->
-      <div id="redirigiendo" class="spinner-box d-none">
-        <div class="spinner-border spinner-border-sm me-2" role="status"></div>Redirigiendo a Webpay…
-      </div>
-
       <!-- Paso 2: formulario embebido -->
       <div id="pagoSection" class="d-none"></div>
       <div id="pagoMsg" class="form-text text-danger text-center mt-2"></div>
@@ -101,6 +105,12 @@
     </div>
   </div>
 </main>
+
+<!-- Pantalla de carga -->
+<div id="overlayCarga" class="overlay-carga d-none" role="status" aria-live="polite">
+  <div class="spinner-border" aria-hidden="true"></div>
+  <div id="textoCarga"></div>
+</div>
 
 <script src="pago.js"></script>
 </body>
